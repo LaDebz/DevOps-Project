@@ -1,0 +1,46 @@
+name: iac-terraform
+
+on: 
+  push:
+    branches:
+     - main
+
+workflow_dispatch:
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+ steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up prerequisites
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install unzip
+
+    - name: Install Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_version: 1.1.7
+
+    - name: Terraform Init
+      run: terraform init \
+        -backend-config="resource_group_name=${{ env.RESOURCE_GROUP }}" \
+        -backend-config="storage_account_name=${{ env.STORAGE_ACCOUNT }}" \
+        -backend-config="container_name=${{ env.CONTAINER }}" \
+        -backend-config="key=${{ env.TFSTATE_FILE }}"
+
+    - name: Terraform Validate
+      run: terraform validate
+
+    - name: Terraform Plan
+      run: terraform plan -var-file=configuration.tfvars -out=tfplan
+      env:
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+    
+
