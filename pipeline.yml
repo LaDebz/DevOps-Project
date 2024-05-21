@@ -1,17 +1,26 @@
 name: iac-terraform
 
-on: 
+on:
   push:
     branches:
-     - main
-
-workflow_dispatch:
+      - main
 
 jobs:
-  terraform:
+  build:
     runs-on: ubuntu-latest
 
- steps:
+    env:
+      RESOURCE_GROUP: ${{ secrets.RESOURCE_GROUP }}
+      STORAGE_ACCOUNT: ${{ secrets.STORAGE_ACCOUNT }}
+      CONTAINER: ${{ secrets.CONTAINER }}
+      TFSTATE_FILE: ${{ secrets.TFSTATE_FILE }}
+      SERVICE_PRINCIPAL: ${{ secrets.SERVICE_PRINCIPAL }}
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+
+    steps:
     - name: Checkout repository
       uses: actions/checkout@v2
 
@@ -42,5 +51,3 @@ jobs:
         ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
         ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
         ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-    
-
