@@ -10,7 +10,7 @@ terraform {
 locals {
   tags                        = merge(var.extra_tags, { "Environment" : var.environment })
 }
-module "ec2" {
+module "resource_group" {
 
   count  = var.DeployAzResourceGroup == "Yes" ? 1 : 0
   source = "./terraform-modules/resource_group/"
