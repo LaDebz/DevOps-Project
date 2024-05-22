@@ -31,12 +31,17 @@ jobs:
       with:
         terraform_version: 1.1.7
 
+    - name: Create backend config file
+      run: |
+        cat <<EOF > backend-config.tfvars
+        resource_group_name = "${{ env.RESOURCE_GROUP }}"
+        storage_account_name = "${{ env.STORAGE_ACCOUNT }}"
+        container_name       = "${{ env.CONTAINER }}"
+        key                  = "${{ env.TFSTATE_FILE }}"
+        EOF
+
     - name: Terraform Init
-      run: terraform init \
-        -backend-config="resource_group_name=${{ env.RESOURCE_GROUP }}" \
-        -backend-config="storage_account_name=${{ env.STORAGE_ACCOUNT }}" \
-        -backend-config="container_name=${{ env.CONTAINER }}" \
-        -backend-config="key=${{ env.TFSTATE_FILE }}"
+      run: terraform init -backend-config=backend-config.tfvars
 
     - name: Terraform Validate
       run: terraform validate
