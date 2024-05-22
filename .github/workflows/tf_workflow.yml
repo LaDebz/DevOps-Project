@@ -3,22 +3,19 @@ name: iac-terraform
 on:
   push:
     branches:
-      - main
+      - none
+  
+  workflow_dispatch: {}
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     env:
-      RESOURCE_GROUP: ${{ secrets.RESOURCE_GROUP }}
-      STORAGE_ACCOUNT: ${{ secrets.STORAGE_ACCOUNT }}
-      CONTAINER: ${{ secrets.CONTAINER }}
-      TFSTATE_FILE: ${{ secrets.TFSTATE_FILE }}
-      SERVICE_PRINCIPAL: ${{ secrets.SERVICE_PRINCIPAL }}
-      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      RESOURCE_GROUP: "rg-storage-tfstate"
+      STORAGE_ACCOUNT: "tfstorage005"
+      CONTAINER: "tfstate"
+      TFSTATE_FILE: "project.tfstate" 
 
     steps:
     - name: Checkout repository
