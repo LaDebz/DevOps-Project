@@ -4,7 +4,7 @@ provider "azurerm" {
 }
 terraform {
   ##Backend variables are initialized by Azure DevOps
-  # backend "azurerm" {}
+  backend "azurerm" {}
 }
 
 locals {
