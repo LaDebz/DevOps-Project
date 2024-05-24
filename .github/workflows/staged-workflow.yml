@@ -1,4 +1,4 @@
-name: iac-terraform
+name: staged-workflow
 
 on:
   push:
