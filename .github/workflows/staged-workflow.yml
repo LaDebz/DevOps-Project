@@ -3,13 +3,24 @@ name: iac-terraform
 on:
   push:
     branches:
-      - main
+      - none
   
   workflow_dispatch: {}
 
 jobs:
   setup:
     runs-on: ubuntu-latest
+
+    env:
+      RESOURCE_GROUP: "rg-storage-tfstate"
+      STORAGE_ACCOUNT: "tfstorage005"
+      CONTAINER: "tfstate"
+      TFSTATE_FILE: "project.tfstate" 
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
@@ -18,77 +29,37 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get -y install unzip
-        
+
     - name: Install Terraform
       uses: hashicorp/setup-terraform@v1
       with:
         terraform_version: 1.1.7
-        
+
     - name: Create backend config file
       run: |
         cat <<EOF > backend-config.tfvars
-        resource_group_name = "rg-storage-tfstate"
-        storage_account_name = "tfstorage005"
-        container_name       = "tfstate"
-        key                  = "project.tfstate"
+        resource_group_name = "${{ env.RESOURCE_GROUP }}"
+        storage_account_name = "${{ env.STORAGE_ACCOUNT }}"
+        container_name       = "${{ env.CONTAINER }}"
+        key                  = "${{ env.TFSTATE_FILE }}"
         EOF
-
-  authenticate:
-    runs-on: ubuntu-latest
-    needs: setup
-    env:
-      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-    steps:
+    
     - name: Set up Azure CLI authentication
       run: |
-        az login --service-principal --username "${{ secrets.ARM_CLIENT_ID }}" --password="${{ secrets.ARM_CLIENT_SECRET }}" --tenant "${{ secrets.ARM_TENANT_ID }}"
-
-  terraform-init:
-    runs-on: ubuntu-latest
-    needs: authenticate
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+        az login --service-principal -t ${{ secrets.ARM_TENANT_ID }} -u ${{ secrets.ARM_CLIENT_ID }} -p ${{ secrets.ARM_CLIENT_SECRET }}
 
     - name: Terraform Init
       run: terraform init -backend-config=backend-config.tfvars
 
-  terraform-validate:
-    runs-on: ubuntu-latest
-    needs: terraform-init
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
     - name: Terraform Validate
       run: terraform validate
-
-  terraform-plan:
-    runs-on: ubuntu-latest
-    needs: terraform-validate
-    env:
-      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
 
     - name: Terraform Plan
       run: terraform plan -var-file=configuration.tfvars -out=tfplan
 
-  terraform-apply:
+  apply:
     runs-on: ubuntu-latest
-    needs: terraform-plan
-    env:
-      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+    needs: setup
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
