@@ -7,14 +7,8 @@ on:
   
   workflow_dispatch: {}
 
-env:
-  ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-  ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-  ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-  ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-
 jobs:
-  setup-init-validate:
+  setup:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
@@ -24,12 +18,12 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get -y install unzip
-
+        
     - name: Install Terraform
       uses: hashicorp/setup-terraform@v1
       with:
         terraform_version: 1.1.7
-
+        
     - name: Create backend config file
       run: |
         cat <<EOF > backend-config.tfvars
@@ -39,53 +33,65 @@ jobs:
         key                  = "project.tfstate"
         EOF
 
+  authenticate:
+    runs-on: ubuntu-latest
+    needs: setup
+    env:
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+    steps:
     - name: Set up Azure CLI authentication
       run: |
         az login --service-principal --username "${{ secrets.ARM_CLIENT_ID }}" --password="${{ secrets.ARM_CLIENT_SECRET }}" --tenant "${{ secrets.ARM_TENANT_ID }}"
 
+  terraform-init:
+    runs-on: ubuntu-latest
+    needs: authenticate
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
     - name: Terraform Init
-      run: terraform init -backend-config=backend-config.tfvars -reconfigure
+      run: terraform init -backend-config=backend-config.tfvars
+
+  terraform-validate:
+    runs-on: ubuntu-latest
+    needs: terraform-init
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
     - name: Terraform Validate
       run: terraform validate
 
-    - name: Upload Terraform directories
-      uses: actions/upload-artifact@v2
-      with:
-        name: terraform-artifacts
-        path: |
-          .terraform
-          .terraform.lock.hcl
-          backend-config.tfvars
-
-  plan:
+  terraform-plan:
     runs-on: ubuntu-latest
-    needs: setup-init-validate
+    needs: terraform-validate
+    env:
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
-
-    - name: Download Terraform directories
-      uses: actions/download-artifact@v2
-      with:
-        name: terraform-artifacts
-        path: .
 
     - name: Terraform Plan
       run: terraform plan -var-file=configuration.tfvars -out=tfplan
 
-  apply:
+  terraform-apply:
     runs-on: ubuntu-latest
-    needs: plan
+    needs: terraform-plan
+    env:
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
-
-    - name: Download Terraform directories
-      uses: actions/download-artifact@v2
-      with:
-        name: terraform-artifacts
-        path: .
 
     - name: Terraform Apply
       run: terraform apply tfplan
