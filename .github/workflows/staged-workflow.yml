@@ -1,9 +1,9 @@
-name: iac-terraform
+name: staged-iac
 
 on:
   push:
     branches:
-      - main
+      - none
   
   workflow_dispatch: {}
 
