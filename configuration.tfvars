@@ -1,7 +1,7 @@
 #-------------------------------------------------
 # Confirmation on resource deployment 
 #-------------------------------------------------
-DeployAzResourceGroup      = "Yes"
+DeployAzResourceGroup      = "No"
 DeployAzVirtualNetwork     = "No"
 DeployAzSubnet             = "No"
 DeployAzDataFactory        = "No"
