@@ -2,9 +2,9 @@
 # Confirmation on resource deployment 
 #-------------------------------------------------
 DeployAzResourceGroup      = "Yes"
-DeployAzVirtualNetwork     = "Yes"
-DeployAzSubnet             = "Yes"
-DeployAzDataFactory        = "Yes"
+DeployAzVirtualNetwork     = "No"
+DeployAzSubnet             = "No"
+DeployAzDataFactory        = "No"
 
 #-------------------------------------------------
 # Values for generic variables 
