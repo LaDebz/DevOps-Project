@@ -3,12 +3,12 @@ name: iac-terraform
 on:
   push:
     branches:
-      - main
+      - none
   
   workflow_dispatch: {}
 
 jobs:
-  build:
+  Deployment:
     runs-on: ubuntu-latest
 
     env:
