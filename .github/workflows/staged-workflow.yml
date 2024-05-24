@@ -75,6 +75,10 @@ jobs:
       with:
         name: terraform-plan
         path: .
-        
+
+    - name: Set up Azure CLI authentication
+      run: |
+        az login --service-principal -t ${{ secrets.ARM_TENANT_ID }} -u ${{ secrets.ARM_CLIENT_ID }} -p ${{ secrets.ARM_CLIENT_SECRET }}
+    
     - name: Terraform Apply
       run: terraform apply tfplan
