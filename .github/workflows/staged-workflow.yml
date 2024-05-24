@@ -57,11 +57,11 @@ jobs:
     - name: Terraform Plan
       run: terraform plan -var-file=configuration.tfvars -out=tfplan
 
-    - name: Save plan artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: terraform-plan
-        path: tfplan 
+    # - name: Save plan artifact
+    #   uses: actions/upload-artifact@v2
+    #   with:
+    #     name: terraform-plan
+    #     path: tfplan 
 
   apply:
     runs-on: ubuntu-latest
@@ -79,9 +79,9 @@ jobs:
         key                  = "${{ env.TFSTATE_FILE }}"
         EOF
     
-    - name: Set up Azure CLI authentication
-      run: |
-        az login --service-principal -t ${{ secrets.ARM_TENANT_ID }} -u ${{ secrets.ARM_CLIENT_ID }} -p ${{ secrets.ARM_CLIENT_SECRET }}
+    # - name: Set up Azure CLI authentication
+    #   run: |
+    #     az login --service-principal -t ${{ secrets.ARM_TENANT_ID }} -u ${{ secrets.ARM_CLIENT_ID }} -p ${{ secrets.ARM_CLIENT_SECRET }}
 
     - name: Terraform Init
       run: terraform init -backend-config=backend-config.tfvars
