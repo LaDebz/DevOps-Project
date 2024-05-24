@@ -1,4 +1,4 @@
-name: staged-deployment
+name: iac-terraform
 
 on:
   push:
@@ -14,7 +14,7 @@ env:
   ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
 jobs:
-  setup:
+  setup-init-validate:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
@@ -30,21 +30,6 @@ jobs:
       with:
         terraform_version: 1.1.7
         
-  authenticate:
-    runs-on: ubuntu-latest
-    needs: setup
-    steps:
-    - name: Set up Azure CLI authentication
-      run: |
-        az login --service-principal --username "${{ env.ARM_CLIENT_ID }}" --password="${{ env.ARM_CLIENT_SECRET }}" --tenant "${{ env.ARM_TENANT_ID }}"
-
-  terraform-init:
-    runs-on: ubuntu-latest
-    needs: authenticate
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-   
     - name: Create backend config file
       run: |
         cat <<EOF > backend-config.tfvars
@@ -54,22 +39,19 @@ jobs:
         key                  = "project.tfstate"
         EOF
     
+    - name: Set up Azure CLI authentication
+      run: |
+        az login --service-principal --username "${{ secrets.ARM_CLIENT_ID }}" --password="${{ secrets.ARM_CLIENT_SECRET }}" --tenant "${{ secrets.ARM_TENANT_ID }}"
+
     - name: Terraform Init
       run: terraform init -backend-config=backend-config.tfvars
-
-  terraform-validate:
-    runs-on: ubuntu-latest
-    needs: terraform-init
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
 
     - name: Terraform Validate
       run: terraform validate
 
-  terraform-plan:
+  plan:
     runs-on: ubuntu-latest
-    needs: terraform-validate
+    needs: setup-init-validate
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
@@ -77,9 +59,9 @@ jobs:
     - name: Terraform Plan
       run: terraform plan -var-file=configuration.tfvars -out=tfplan
 
-  # terraform-apply:
+  # apply:
   #   runs-on: ubuntu-latest
-  #   needs: terraform-plan
+  #   needs: plan
   #   steps:
   #   - name: Checkout repository
   #     uses: actions/checkout@v2
