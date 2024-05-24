@@ -3,7 +3,7 @@ name: staged-iac
 on:
   push:
     branches:
-      - none
+      - main
   
   workflow_dispatch: {}
 
@@ -70,15 +70,27 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Download plan artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: terraform-plan
-        path: .
-
+    - name: Create backend config file
+      run: |
+        cat <<EOF > backend-config.tfvars
+        resource_group_name = "${{ env.RESOURCE_GROUP }}"
+        storage_account_name = "${{ env.STORAGE_ACCOUNT }}"
+        container_name       = "${{ env.CONTAINER }}"
+        key                  = "${{ env.TFSTATE_FILE }}"
+        EOF
+    
     - name: Set up Azure CLI authentication
       run: |
         az login --service-principal -t ${{ secrets.ARM_TENANT_ID }} -u ${{ secrets.ARM_CLIENT_ID }} -p ${{ secrets.ARM_CLIENT_SECRET }}
-    
+
+    - name: Terraform Init
+      run: terraform init -backend-config=backend-config.tfvars
+      
+    # - name: Download plan artifact
+    #   uses: actions/download-artifact@v2
+    #   with:
+    #     name: terraform-plan
+    #     path: .
+
     - name: Terraform Apply
-      run: terraform apply tfplan
+      run: terraform apply
