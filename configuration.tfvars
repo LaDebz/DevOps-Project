@@ -10,11 +10,11 @@ DeployAzDataFactory        = "No"
 # Values for generic variables 
 #-------------------------------------------------
 environment = "test"
-region      = "West Europe"
+region      = "canada central"
 catlog      = "azurepoc"
 extra_tags = {
-  "ProjectOwner" : "ThinkCloudly",
-  "Created-by" : "ThinkCloudly"
+  "ProjectOwner" : "LaDebz",
+  "Created-by" : "DevConsults"
   
 }
 
@@ -23,31 +23,31 @@ extra_tags = {
 #-------------------------------------------------
 rg_dict = [  {
     resource_group_name = "rg-azurepoc-test"
-    region              = "West Europe"
+    region              = "Canada Central"
     tags = {
-            "ProjectOwner" : "ThinkCloudly",
-            "Created-at" : "2023-07-22T00:00:00Z",
-            "Created-by" : "ThinkCloudly"
+            "ProjectOwner" : "LaDebz ",
+            "Created-at" : "2024-07-22T00:00:00Z",
+            "Created-by" : "DevConsults"
             
  }
   },
   {
-    resource_group_name = "rg-azurepoc-victor"
-    region              = "West Europe"
+    resource_group_name = "rg-azurepoc-prod"
+    region              = "Canada Central"
     tags = {
-            "ProjectOwner" : "ThinkCloudly",
-            "Created-at" : "2023-07-22T00:00:00Z",
-            "Created-by" : "ThinkCloudly"
+            "ProjectOwner" : "LaDebz",
+            "Created-at" : "2024-07-22T00:00:00Z",
+            "Created-by" : "DevConsults"
             
  }
   },
   {
-    resource_group_name = "rg-azurepoc-Pallavi"
-    region              = "West Europe"
+    resource_group_name = "rg-azurepoc-demo"
+    region              = "Canada Central"
     tags = {
-            "ProjectOwner" : "ThinkCloudly",
-            "Created-at" : "2023-07-22T00:00:00Z",
-            "Created-by" : "ThinkCloudly"
+            "ProjectOwner" : "LaDebz",
+            "Created-at" : "2024-07-22T00:00:00Z",
+            "Created-by" : "DevConsults"
             
  }
   }
@@ -94,9 +94,9 @@ adf_dict = [
     identity_ids                    = ""
     region      = "West Europe"
     tags = {
-            "ProjectOwner" : "ThinkCloudly",
-            "Created-at"   : "2023-07-22T00:00:00Z",
-            "Created-by"   : "ThinkCloudly"
+            "ProjectOwner" : "LaDebz",
+            "Created-at"   : "2024-07-22T00:00:00Z",
+            "Created-by"   : "DevConsults"
             
 }
     global_parameters_required    = false
